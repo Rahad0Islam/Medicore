@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.userservice.user_service.dto.DoctorRequest;
 import com.userservice.user_service.dto.DoctorResponse;
+import com.userservice.user_service.security.UserPrincipal;
 import com.userservice.user_service.service.DoctorService;
 
 import jakarta.validation.Valid;
@@ -31,8 +33,11 @@ public class DoctorController {
     }
 
     @PostMapping
-    public ResponseEntity<DoctorResponse> create(@Valid @RequestBody DoctorRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(doctorService.create(request));
+    public ResponseEntity<DoctorResponse> create(
+            @AuthenticationPrincipal UserPrincipal principal,
+            @Valid @RequestBody DoctorRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(doctorService.create(principal.getEmail(), principal.getName(), request));
     }
 
     @GetMapping("/{id}")
@@ -54,8 +59,11 @@ public class DoctorController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<DoctorResponse> update(@PathVariable Long id, @Valid @RequestBody DoctorRequest request) {
-        return ResponseEntity.ok(doctorService.update(id, request));
+    public ResponseEntity<DoctorResponse> update(
+            @PathVariable Long id,
+            @AuthenticationPrincipal UserPrincipal principal,
+            @Valid @RequestBody DoctorRequest request) {
+        return ResponseEntity.ok(doctorService.update(id, principal.getEmail(), principal.getName(), request));
     }
 
     @DeleteMapping("/{id}")

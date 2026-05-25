@@ -24,12 +24,12 @@ public class PatientServiceImpl implements PatientService {
     }
 
     @Override
-    public PatientResponse create(PatientRequest request) {
-        if (patientRepository.existsByEmail(request.getEmail())) {
+    public PatientResponse create(String email, String name, PatientRequest request) {
+        if (patientRepository.existsByEmail(email)) {
             throw new IllegalArgumentException("Email is already registered");
         }
         Patient patient = new Patient();
-        applyRequest(patient, request);
+        applyRequest(patient, email, name, request);
         Patient saved = patientRepository.save(patient);
         return toResponse(saved);
     }
@@ -49,14 +49,14 @@ public class PatientServiceImpl implements PatientService {
     }
 
     @Override
-    public PatientResponse update(Long id, PatientRequest request) {
+    public PatientResponse update(Long id, String email, String name, PatientRequest request) {
         Patient patient = patientRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Patient not found"));
-        if (!patient.getEmail().equalsIgnoreCase(request.getEmail())
-                && patientRepository.existsByEmail(request.getEmail())) {
+        if (!patient.getEmail().equalsIgnoreCase(email)
+                && patientRepository.existsByEmail(email)) {
             throw new IllegalArgumentException("Email is already registered");
         }
-        applyRequest(patient, request);
+        applyRequest(patient, email, name, request);
         return toResponse(patientRepository.save(patient));
     }
 
@@ -68,9 +68,9 @@ public class PatientServiceImpl implements PatientService {
         patientRepository.deleteById(id);
     }
 
-    private void applyRequest(Patient patient, PatientRequest request) {
-        patient.setEmail(request.getEmail());
-        patient.setName(request.getName());
+    private void applyRequest(Patient patient, String email, String name, PatientRequest request) {
+        patient.setEmail(email);
+        patient.setName(name);
         patient.setPhone(request.getPhone());
         patient.setGender(request.getGender());
         patient.setDateOfBirth(request.getDateOfBirth());

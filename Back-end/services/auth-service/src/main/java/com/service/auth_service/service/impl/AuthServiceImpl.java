@@ -80,7 +80,7 @@ public class AuthServiceImpl implements AuthService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
-        String newAccessToken = jwtService.generateAccessToken(user.getEmail(), user.getRole());
+        String newAccessToken = jwtService.generateAccessToken(user.getEmail(), user.getName(), user.getRole());
         UserResponse userResponse = new UserResponse(
                 user.getId(),
                 user.getEmail(),
@@ -96,7 +96,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     private AuthResponse buildAuthResponse(User user) {
-        String accessToken = jwtService.generateAccessToken(user.getEmail(), user.getRole());
+        String accessToken = jwtService.generateAccessToken(user.getEmail(), user.getName(), user.getRole());
         String refreshToken = jwtService.generateRefreshToken(user.getEmail(), user.getRole());
         UserResponse userResponse = new UserResponse(
                 user.getId(),

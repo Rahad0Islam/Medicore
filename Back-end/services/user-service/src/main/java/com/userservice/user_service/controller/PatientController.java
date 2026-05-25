@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.userservice.user_service.dto.PatientRequest;
 import com.userservice.user_service.dto.PatientResponse;
+import com.userservice.user_service.security.UserPrincipal;
 import com.userservice.user_service.service.PatientService;
 
 import jakarta.validation.Valid;
@@ -30,8 +32,11 @@ public class PatientController {
     }
 
     @PostMapping
-    public ResponseEntity<PatientResponse> create(@Valid @RequestBody PatientRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(patientService.create(request));
+    public ResponseEntity<PatientResponse> create(
+            @AuthenticationPrincipal UserPrincipal principal,
+            @Valid @RequestBody PatientRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(patientService.create(principal.getEmail(), principal.getName(), request));
     }
 
     @GetMapping("/{id}")
@@ -45,8 +50,11 @@ public class PatientController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<PatientResponse> update(@PathVariable Long id, @Valid @RequestBody PatientRequest request) {
-        return ResponseEntity.ok(patientService.update(id, request));
+    public ResponseEntity<PatientResponse> update(
+            @PathVariable Long id,
+            @AuthenticationPrincipal UserPrincipal principal,
+            @Valid @RequestBody PatientRequest request) {
+        return ResponseEntity.ok(patientService.update(id, principal.getEmail(), principal.getName(), request));
     }
 
     @DeleteMapping("/{id}")

@@ -33,9 +33,10 @@ public class JwtService {
         this.refreshTokenDays = refreshTokenDays;
     }
 
-    public String generateAccessToken(String email, Role role) {
+    public String generateAccessToken(String email, String name, Role role) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("role", role.name());
+        claims.put("name", name);
         claims.put("type", "access");
         return buildToken(email, claims, Duration.ofMinutes(accessTokenMinutes));
     }

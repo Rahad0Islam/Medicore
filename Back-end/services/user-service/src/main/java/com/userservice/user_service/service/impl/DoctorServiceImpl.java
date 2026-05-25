@@ -24,12 +24,12 @@ public class DoctorServiceImpl implements DoctorService {
     }
 
     @Override
-    public DoctorResponse create(DoctorRequest request) {
-        if (doctorRepository.existsByEmail(request.getEmail())) {
+    public DoctorResponse create(String email, String name, DoctorRequest request) {
+        if (doctorRepository.existsByEmail(email)) {
             throw new IllegalArgumentException("Email is already registered");
         }
         Doctor doctor = new Doctor();
-        applyRequest(doctor, request);
+        applyRequest(doctor, email, name, request);
         Doctor saved = doctorRepository.save(doctor);
         return toResponse(saved);
     }
@@ -61,14 +61,14 @@ public class DoctorServiceImpl implements DoctorService {
     }
 
     @Override
-    public DoctorResponse update(Long id, DoctorRequest request) {
+    public DoctorResponse update(Long id, String email, String name, DoctorRequest request) {
         Doctor doctor = doctorRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Doctor not found"));
-        if (!doctor.getEmail().equalsIgnoreCase(request.getEmail())
-                && doctorRepository.existsByEmail(request.getEmail())) {
+        if (!doctor.getEmail().equalsIgnoreCase(email)
+                && doctorRepository.existsByEmail(email)) {
             throw new IllegalArgumentException("Email is already registered");
         }
-        applyRequest(doctor, request);
+        applyRequest(doctor, email, name, request);
         return toResponse(doctorRepository.save(doctor));
     }
 
@@ -80,9 +80,9 @@ public class DoctorServiceImpl implements DoctorService {
         doctorRepository.deleteById(id);
     }
 
-    private void applyRequest(Doctor doctor, DoctorRequest request) {
-        doctor.setEmail(request.getEmail());
-        doctor.setName(request.getName());
+    private void applyRequest(Doctor doctor, String email, String name, DoctorRequest request) {
+        doctor.setEmail(email);
+        doctor.setName(name);
         doctor.setPhone(request.getPhone());
         doctor.setSpecialization(request.getSpecialization());
         doctor.setDepartment(request.getDepartment());
