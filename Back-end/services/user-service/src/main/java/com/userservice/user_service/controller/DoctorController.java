@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -33,6 +34,7 @@ public class DoctorController {
     }
 
     @PostMapping
+    @PreAuthorize("hasAnyRole('DOCTOR','ADMIN')")
     public ResponseEntity<DoctorResponse> create(
             @AuthenticationPrincipal UserPrincipal principal,
             @Valid @RequestBody DoctorRequest request) {
@@ -41,11 +43,13 @@ public class DoctorController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('PATIENT','DOCTOR','ADMIN')")
     public ResponseEntity<DoctorResponse> getById(@PathVariable Long id) {
         return ResponseEntity.ok(doctorService.getById(id));
     }
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('PATIENT','DOCTOR','ADMIN')")
     public ResponseEntity<List<DoctorResponse>> getAll(@RequestParam(value = "query", required = false) String query) {
         if (query != null && !query.isBlank()) {
             return ResponseEntity.ok(doctorService.search(query));
@@ -54,11 +58,13 @@ public class DoctorController {
     }
 
     @GetMapping("/search")
+    @PreAuthorize("hasAnyRole('PATIENT','DOCTOR','ADMIN')")
     public ResponseEntity<List<DoctorResponse>> search(@RequestParam("query") String query) {
         return ResponseEntity.ok(doctorService.search(query));
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('DOCTOR','ADMIN')")
     public ResponseEntity<DoctorResponse> update(
             @PathVariable Long id,
             @AuthenticationPrincipal UserPrincipal principal,
@@ -67,6 +73,7 @@ public class DoctorController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         doctorService.delete(id);
         return ResponseEntity.noContent().build();

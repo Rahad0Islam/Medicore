@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -32,6 +33,7 @@ public class PatientController {
     }
 
     @PostMapping
+    @PreAuthorize("hasAnyRole('PATIENT','ADMIN')")
     public ResponseEntity<PatientResponse> create(
             @AuthenticationPrincipal UserPrincipal principal,
             @Valid @RequestBody PatientRequest request) {
@@ -40,16 +42,19 @@ public class PatientController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('PATIENT','DOCTOR','ADMIN')")
     public ResponseEntity<PatientResponse> getById(@PathVariable Long id) {
         return ResponseEntity.ok(patientService.getById(id));
     }
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('PATIENT','DOCTOR','ADMIN')")
     public ResponseEntity<List<PatientResponse>> getAll() {
         return ResponseEntity.ok(patientService.getAll());
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('PATIENT','ADMIN')")
     public ResponseEntity<PatientResponse> update(
             @PathVariable Long id,
             @AuthenticationPrincipal UserPrincipal principal,
@@ -58,6 +63,7 @@ public class PatientController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         patientService.delete(id);
         return ResponseEntity.noContent().build();
