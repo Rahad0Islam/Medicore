@@ -13,7 +13,6 @@ import com.service.auth_service.config.UserPrincipal;
 import com.service.auth_service.dto.AuthResponse;
 import com.service.auth_service.dto.LoginRequest;
 import com.service.auth_service.dto.RefreshRequest;
-import com.service.auth_service.dto.RegisterRequest;
 import com.service.auth_service.dto.UserResponse;
 import com.service.auth_service.service.AuthService;
 
@@ -29,11 +28,6 @@ public class AuthController {
         this.authService = authService;
     }
 
-    @PostMapping("/register")
-    public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(authService.register(request));
-    }
-
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
         return ResponseEntity.ok(authService.login(request));
@@ -42,6 +36,12 @@ public class AuthController {
     @PostMapping("/refresh")
     public ResponseEntity<AuthResponse> refresh(@Valid @RequestBody RefreshRequest request) {
         return ResponseEntity.ok(authService.refresh(request));
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(@Valid @RequestBody RefreshRequest request) {
+        authService.logout(request);
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/me")

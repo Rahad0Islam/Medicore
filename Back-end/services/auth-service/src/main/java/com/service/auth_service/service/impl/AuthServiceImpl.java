@@ -95,6 +95,14 @@ public class AuthServiceImpl implements AuthService {
                 userResponse);
     }
 
+    @Override
+    public void logout(RefreshRequest request) {
+        String refreshToken = request.getRefreshToken();
+        if (!jwtService.isTokenValid(refreshToken) || !jwtService.isRefreshToken(refreshToken)) {
+            throw new IllegalArgumentException("Invalid refresh token");
+        }
+    }
+
     private AuthResponse buildAuthResponse(User user) {
         String accessToken = jwtService.generateAccessToken(user.getEmail(), user.getName(), user.getRole());
         String refreshToken = jwtService.generateRefreshToken(user.getEmail(), user.getRole());

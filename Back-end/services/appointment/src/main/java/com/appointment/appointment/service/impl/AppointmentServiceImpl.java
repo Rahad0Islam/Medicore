@@ -11,12 +11,11 @@ import com.appointment.appointment.dto.BookAppointmentRequest;
 import com.appointment.appointment.dto.QueueItemResponse;
 import com.appointment.appointment.entity.Appointment;
 import com.appointment.appointment.entity.AppointmentStatus;
-import com.appointment.appointment.entity.DoctorDailySerial;
 import com.appointment.appointment.exception.ConflictException;
 import com.appointment.appointment.exception.ResourceNotFoundException;
 import com.appointment.appointment.repository.AppointmentRepository;
-import com.appointment.appointment.repository.DoctorDailySerialRepository;
 import com.appointment.appointment.service.AppointmentService;
+import com.appointment.appointment.service.SerialNumberGenerator;
 
 import lombok.RequiredArgsConstructor;
 
@@ -25,7 +24,7 @@ import lombok.RequiredArgsConstructor;
 public class AppointmentServiceImpl implements AppointmentService {
 
 	private final AppointmentRepository appointmentRepository;
-	private final DoctorDailySerialRepository doctorDailySerialRepository;
+	private final SerialNumberGenerator serialNumberGenerator;
 
 	@Override
 	@Transactional
@@ -39,25 +38,14 @@ public class AppointmentServiceImpl implements AppointmentService {
 			throw new ConflictException("Time slot already booked for this doctor.");
 		}
 
-		DoctorDailySerial serialTracker = doctorDailySerialRepository
-				.findForUpdate(request.getDoctorId(), request.getAppointmentDate())
-				.orElseGet(() -> {
-					DoctorDailySerial fresh = new DoctorDailySerial();
-					fresh.setDoctorId(request.getDoctorId());
-					fresh.setServiceDate(request.getAppointmentDate());
-					fresh.setLastSerial(0);
-					return fresh;
-				});
-
-		serialTracker.setLastSerial(serialTracker.getLastSerial() + 1);
-		doctorDailySerialRepository.save(serialTracker);
+		int nextSerial = serialNumberGenerator.nextSerial(request.getDoctorId(), request.getAppointmentDate());
 
 		Appointment appointment = new Appointment();
 		appointment.setPatientId(request.getPatientId());
 		appointment.setDoctorId(request.getDoctorId());
 		appointment.setAppointmentDate(request.getAppointmentDate());
 		appointment.setTimeSlot(request.getTimeSlot());
-		appointment.setSerialNumber(serialTracker.getLastSerial());
+		appointment.setSerialNumber(nextSerial);
 		appointment.setStatus(AppointmentStatus.BOOKED);
 		appointment.setReason(request.getReason());
 
